@@ -7,6 +7,7 @@
   <link rel="icon" type="image/png" href="favicon.png">
   <meta property="og:title" content="BABYZION MARKET">
   <meta property="og:description" content="Adorable, safe & stylish baby clothes, toys, and essentials.">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
     body.gradient {
       margin: 0;
@@ -84,6 +85,72 @@
       color: #555;
     }
 
+    /* ===== SCROLLING PRODUCT GALLERY ===== */
+    .product-gallery {
+      background: linear-gradient(135deg, #fff1f8, #f8f5ff);
+      padding: 60px 20px;
+      margin: 60px -20px;
+      overflow: hidden;
+    }
+
+    .product-gallery h3 {
+      color: #ff90b3;
+      font-size: 1.8rem;
+      margin-bottom: 30px;
+    }
+
+    .scroll-container {
+      display: flex;
+      gap: 20px;
+      animation: scroll 60s linear infinite;
+      width: max-content;
+    }
+
+    .scroll-container:hover {
+      animation-play-state: paused;
+    }
+
+    .scroll-item {
+      flex-shrink: 0;
+      width: 250px;
+      background: white;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .scroll-item:hover {
+      transform: translateY(-10px);
+    }
+
+    .scroll-item img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .scroll-item-info {
+      padding: 15px;
+    }
+
+    .scroll-item h4 {
+      color: #333;
+      font-size: 1rem;
+      margin-bottom: 5px;
+    }
+
+    .scroll-item .price {
+      color: #ff90b3;
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+
+    @keyframes scroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
     /* ===== TESTIMONIALS ===== */
     .testimonials {
       background: #fff;
@@ -104,18 +171,95 @@
 
     .testimonial {
       margin: 25px auto;
-      padding: 10px 20px;
+      padding: 20px;
       font-style: italic;
       color: #555;
       background: #fff9fb;
       border-radius: 15px;
       max-width: 650px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      text-align: left;
+    }
+
+    .testimonial-image {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 3px solid #ff90b3;
+    }
+
+    .testimonial-content {
+      flex: 1;
     }
 
     .customer-name {
       margin-top: 10px;
       font-weight: 600;
       color: #444;
+      font-style: normal;
+    }
+
+    /* ===== SOCIAL MEDIA SECTION ===== */
+    .social-section {
+      background: linear-gradient(135deg, #ff6b9d, #ff8fab);
+      color: white;
+      padding: 60px 20px;
+      margin: 60px -20px;
+      border-radius: 30px;
+    }
+
+    .social-section h3 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+    }
+
+    .social-section p {
+      font-size: 1.1rem;
+      margin-bottom: 30px;
+      opacity: 0.95;
+    }
+
+    .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      flex-wrap: wrap;
+      margin-top: 30px;
+    }
+
+    .social-link {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: white;
+      transition: transform 0.3s ease;
+    }
+
+    .social-link:hover {
+      transform: scale(1.1);
+    }
+
+    .social-icon {
+      font-size: 3rem;
+      background: rgba(255,255,255,0.2);
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(10px);
+    }
+
+    .social-handle {
+      font-weight: 600;
+      font-size: 1rem;
     }
 
     /* ===== FOOTER ===== */
@@ -126,23 +270,6 @@
       color: #777;
       font-size: 0.95rem;
       margin-top: 80px;
-    }
-
-    .social-links {
-      margin-top: 15px;
-    }
-
-    .social-links a {
-      display: inline-block;
-      margin: 0 10px;
-      font-size: 1.4rem;
-      color: #ff90b3;
-      text-decoration: none;
-      transition: transform 0.3s ease;
-    }
-
-    .social-links a:hover {
-      transform: scale(1.2);
     }
 
     /* ===== WHATSAPP BUTTON ===== */
@@ -178,6 +305,28 @@
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
     }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .testimonial {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .scroll-item {
+        width: 200px;
+      }
+
+      .social-links {
+        gap: 20px;
+      }
+
+      .social-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 2rem;
+      }
+    }
   </style>
 </head>
 
@@ -206,33 +355,81 @@
   <main>
     <section>
       <h2>Welcome to BABYZION MARKET</h2>
-      <p>We started as moms who couldn’t find cute, safe, and affordable baby essentials all in one place.</p>
+      <p>We started as moms who couldn't find cute, safe, and affordable baby essentials all in one place.</p>
       <p>Today, BABYZION is a warm global marketplace where parents buy and sell handmade or gently-loved baby items. Every purchase supports a real family, and every sale shares a story.</p>
       <p>From Somali-inspired baby Dirac dresses to eco-friendly wooden toys and organic bamboo swaddles — we celebrate love, culture, and sustainability in every tiny detail.</p>
     </section>
 
-    <!-- TESTIMONIALS -->
+    <!-- SCROLLING PRODUCT GALLERY -->
+    <section class="product-gallery">
+      <h3>Our Popular Products 💝</h3>
+      <div class="scroll-container" id="scrolling-products">
+        <!-- Products will be loaded here dynamically -->
+      </div>
+    </section>
+
+    <!-- TESTIMONIALS WITH CUSTOMER IMAGES -->
     <section class="testimonials">
       <h3>What Our Happy Parents Say 💕</h3>
 
       <div class="testimonial">
-        “I found the perfect baby shower gift — and it arrived beautifully wrapped. The handmade rattle was a hit!”  
-        <div class="customer-name">— Amina, Nairobi</div>
+        <img src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=150&h=150&fit=crop" alt="Amina" class="testimonial-image">
+        <div class="testimonial-content">
+          "I found the perfect baby shower gift — and it arrived beautifully wrapped. The handmade rattle was a hit!"  
+          <div class="customer-name">— Amina, Nairobi</div>
+        </div>
       </div>
 
       <div class="testimonial">
-        “Every item feels made with love. My toddler’s wooden toy set still looks brand new after months of play!”  
-        <div class="customer-name">— Grace, Mombasa</div>
+        <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop" alt="Grace" class="testimonial-image">
+        <div class="testimonial-content">
+          "Every item feels made with love. My toddler's wooden toy set still looks brand new after months of play!"  
+          <div class="customer-name">— Grace, Mombasa</div>
+        </div>
       </div>
 
       <div class="testimonial">
-        “Selling my baby’s outgrown clothes here was so easy — and I earned enough to buy new essentials!”  
-        <div class="customer-name">— Fatma, Eldoret</div>
+        <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&h=150&fit=crop" alt="Fatma" class="testimonial-image">
+        <div class="testimonial-content">
+          "Selling my baby's outgrown clothes here was so easy — and I earned enough to buy new essentials!"  
+          <div class="customer-name">— Fatma, Eldoret</div>
+        </div>
       </div>
 
       <div class="testimonial">
-        “I adore the organic cotton onesies! They’re super soft and gentle on my baby’s skin.”  
-        <div class="customer-name">— Clara, Kisumu</div>
+        <img src="https://images.unsplash.com/photo-1614204424926-196a80bf0be8?w=150&h=150&fit=crop" alt="Clara" class="testimonial-image">
+        <div class="testimonial-content">
+          "I adore the organic cotton onesies! They're super soft and gentle on my baby's skin."  
+          <div class="customer-name">— Clara, Kisumu</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SOCIAL MEDIA SECTION -->
+    <section class="social-section">
+      <h3>Follow Us on Social Media 📱</h3>
+      <p>Join our community of happy parents! Get daily inspiration, parenting tips, and exclusive deals.</p>
+
+      <div class="social-links">
+        <a href="https://instagram.com/babyzion_market" target="_blank" class="social-link">
+          <div class="social-icon"><i class="fab fa-instagram"></i></div>
+          <div class="social-handle">@babyzion_market</div>
+        </a>
+
+        <a href="https://facebook.com/babyzionmarket" target="_blank" class="social-link">
+          <div class="social-icon"><i class="fab fa-facebook"></i></div>
+          <div class="social-handle">BabyZion Market</div>
+        </a>
+
+        <a href="https://twitter.com/babyzion_ke" target="_blank" class="social-link">
+          <div class="social-icon"><i class="fab fa-twitter"></i></div>
+          <div class="social-handle">@babyzion_ke</div>
+        </a>
+
+        <a href="https://wa.me/254703831957?text=Hi%20BABYZION!" target="_blank" class="social-link">
+          <div class="social-icon"><i class="fab fa-whatsapp"></i></div>
+          <div class="social-handle">+254 703 831957</div>
+        </a>
       </div>
     </section>
   </main>
@@ -240,13 +437,46 @@
   <!-- FOOTER -->
   <footer>
     <p>© 2025 BABYZION MARKET — Celebrating Little Joys Every Day 🌸</p>
-    <div class="social-links">
-      <a href="https://instagram.com" target="_blank" title="Instagram">📸</a>
-      <a href="https://facebook.com" target="_blank" title="Facebook">👍</a>
-      <a href="https://tiktok.com" target="_blank" title="TikTok">🎵</a>
-    </div>
   </footer>
 
   <script src="cart.js"></script>
+  <script>
+    // Load and display scrolling products
+    document.addEventListener('DOMContentLoaded', () => {
+      fetch('/api/products')
+        .then(res => res.json())
+        .then(products => {
+          const container = document.getElementById('scrolling-products');
+          container.innerHTML = ''; // Clear loading message
+
+          if (products.length === 0) {
+            container.innerHTML = '<p style="text-align:center;color:#999;">No products available</p>';
+            return;
+          }
+
+          // Take first 20 products and duplicate them 3 times for seamless scrolling
+          const featured = products.slice(0, 20);
+          const displayProducts = [...featured, ...featured, ...featured];
+
+          displayProducts.forEach(product => {
+            const item = document.createElement('div');
+            item.className = 'scroll-item';
+            item.innerHTML = `
+              <img src="${product.image}" alt="${product.name}" onerror="this.src='https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400&h=400&fit=crop'">
+              <div class="scroll-item-info">
+                <h4>${product.name}</h4>
+                <div class="price">$${product.price.toFixed(2)}</div>
+              </div>
+            `;
+            container.appendChild(item);
+          });
+        })
+        .catch(err => {
+          console.error('Error loading products:', err);
+          document.getElementById('scrolling-products').innerHTML = 
+            '<p style="text-align:center;color:#ff6b9d;">Unable to load products. Please refresh the page.</p>';
+        });
+    });
+  </script>
 </body>
 </html>

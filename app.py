@@ -1,16 +1,33 @@
 
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory, session
 from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 import sqlite3
 import json
 from datetime import datetime
 import os
 import uuid
 import requests
+import secrets
+import re
 from cj_client import CJDropshippingClient
 
 app = Flask(__name__, static_folder='.', static_url_path='')
-CORS(app)
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', secrets.token_hex(32))
+app.config['SESSION_COOKIE_SECURE'] = True
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+
+CORS(app, supports_credentials=True)
+
+# Rate limiting
+limiter = Limiter(
+    app=app,
+    key_func=get_remote_address,
+    default_limits=["200 per day", "50 per hour"],
+    storage_uri="memory://"
+)
 
 cj_client = CJDropshippingClient()
 
@@ -20,6 +37,23 @@ def get_db():
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
     return conn
+
+def validate_email(email):
+    """Validate email format"""
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(pattern, email) is not None
+
+def validate_phone(phone):
+    """Validate phone number format"""
+    pattern = r'^\+?[0-9]{10,15}$'
+    return re.match(pattern, phone.replace(' ', '').replace('-', '')) is not None
+
+def sanitize_input(text, max_length=500):
+    """Sanitize user input"""
+    if not text:
+        return ""
+    text = str(text).strip()
+    return text[:max_length]
 
 def init_db():
     with app.app_context():
@@ -46,14 +80,15 @@ def init_db():
         count = conn.execute('SELECT COUNT(*) FROM products').fetchone()[0]
         if count == 0:
             products = [
-                ('P001', 'Somali Dirac Baby Set', 'Premium cultural wear', 3500, 'Cultural Baby Wear', 'dirac.jpg'),
-                ('P002', 'Montessori Wooden Rattle', '100% organic beech wood', 1500, 'Wooden Toys', 'rattle.jpg'),
-                ('P003', 'Newborn Swaddle Pack', '3-piece muslin set', 2200, 'Newborn Essentials', 'swaddle.jpg'),
-                ('P004', 'Mom & Baby Ankara Set', 'Matching mommy-me', 5500, 'Mom & Baby Sets', 'ankara.jpg'),
-                ('P005', 'Eid Mubarak Onesie', 'Gold embroidery', 2500, 'Cultural Baby Wear', 'eid.jpg'),
-                ('P006', 'Silicone Teething Ring', 'Food-grade silicone', 900, 'Wooden Toys', 'teether.jpg')
+                ('P001', 'Somali Dirac Baby Set', 'Premium cultural wear', 35.00, 'Cultural Baby Wear', 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400&h=400&fit=crop', 1),
+                ('P002', 'Montessori Wooden Rattle', '100% organic beech wood', 15.00, 'Wooden Toys', 'https://images.unsplash.com/photo-1580130732478-3ddc2f96f6e4?w=400&h=400&fit=crop', 1),
+                ('P003', 'Newborn Swaddle Pack', '3-piece muslin set', 22.00, 'Newborn Essentials', 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400&h=400&fit=crop', 1),
+                ('P004', 'Mom & Baby Ankara Set', 'Matching mommy-me', 55.00, 'Mom & Baby Sets', 'https://images.unsplash.com/photo-1566694271453-390536dd1f0d?w=400&h=400&fit=crop', 1),
+                ('P005', 'Eid Mubarak Onesie', 'Gold embroidery', 25.00, 'Cultural Baby Wear', 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400&h=400&fit=crop', 1),
+                ('P006', 'Silicone Teething Ring', 'Food-grade silicone', 9.00, 'Wooden Toys', 'https://images.unsplash.com/photo-1580130732478-3ddc2f96f6e4?w=400&h=400&fit=crop', 1)
             ]
-            conn.executemany('INSERT INTO products VALUES (?,?,?,?,?,?)', products)
+            conn.executemany('INSERT INTO products VALUES (?,?,?,?,?,?,?)', products)
+            print(f"✅ Seeded {len(products)} products into database")
         conn.commit()
 
 init_db()
@@ -68,14 +103,20 @@ def static_files(path):
 
 @app.route('/api/products')
 def products():
-    category = request.args.get('category')
-    conn = get_db()
-    if category:
-        rows = conn.execute('SELECT * FROM products WHERE category=? AND in_stock=1', (category,)).fetchall()
-    else:
-        rows = conn.execute('SELECT * FROM products WHERE in_stock=1').fetchall()
-    conn.close()
-    return jsonify([dict(row) for row in rows])
+    try:
+        category = request.args.get('category')
+        conn = get_db()
+        if category:
+            rows = conn.execute('SELECT * FROM products WHERE category=? AND in_stock=1', (category,)).fetchall()
+        else:
+            rows = conn.execute('SELECT * FROM products WHERE in_stock=1').fetchall()
+        conn.close()
+        products_list = [dict(row) for row in rows]
+        print(f"✅ Returning {len(products_list)} products")
+        return jsonify(products_list)
+    except Exception as e:
+        print(f"❌ Error fetching products: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/categories')
 def categories():
@@ -127,9 +168,38 @@ def sync_cj_products():
 
 # Orders Management
 @app.route('/api/orders', methods=['POST'])
+@limiter.limit("10 per hour")
 def create_order():
     try:
         data = request.json
+        
+        # Validate required fields
+        required_fields = ['name', 'email', 'phone', 'address', 'city', 'country', 'items']
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({'success': False, 'message': f'Missing required field: {field}'}), 400
+        
+        # Validate email
+        if not validate_email(data.get('email')):
+            return jsonify({'success': False, 'message': 'Invalid email format'}), 400
+        
+        # Validate phone
+        if not validate_phone(data.get('phone')):
+            return jsonify({'success': False, 'message': 'Invalid phone number'}), 400
+        
+        # Sanitize inputs
+        customer_name = sanitize_input(data.get('name'), 100)
+        customer_email = sanitize_input(data.get('email'), 100)
+        customer_phone = sanitize_input(data.get('phone'), 20)
+        shipping_address = sanitize_input(data.get('address'), 200)
+        shipping_city = sanitize_input(data.get('city'), 100)
+        shipping_country = sanitize_input(data.get('country'), 100)
+        
+        # Validate items
+        items = data.get('items', [])
+        if not items or not isinstance(items, list):
+            return jsonify({'success': False, 'message': 'Invalid items'}), 400
+        
         order_id = f"BZ{uuid.uuid4().hex[:8].upper()}"
         
         conn = get_db()
@@ -140,13 +210,13 @@ def create_order():
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             order_id,
-            data.get('name'),
-            data.get('email'),
-            data.get('phone'),
-            data.get('address'),
-            data.get('city'),
-            data.get('country'),
-            json.dumps(data.get('items', [])),
+            customer_name,
+            customer_email,
+            customer_phone,
+            shipping_address,
+            shipping_city,
+            shipping_country,
+            json.dumps(items),
             float(data.get('subtotal', 0)),
             float(data.get('shipping_cost', 12)),
             float(data.get('total', 0)),
@@ -160,8 +230,10 @@ def create_order():
             'order_id': order_id,
             'message': 'Order created successfully'
         })
+    except ValueError as e:
+        return jsonify({'success': False, 'message': 'Invalid numeric value'}), 400
     except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 500
+        return jsonify({'success': False, 'message': 'Server error'}), 500
 
 @app.route('/api/orders/<order_id>', methods=['GET'])
 def get_order(order_id):
@@ -177,8 +249,30 @@ def get_order(order_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# Paystack Payment Integration
+@app.route('/api/paystack/initialize', methods=['POST'])
+@limiter.limit("10 per hour")
+def initialize_paystack():
+    try:
+        paystack_public_key = os.environ.get('PAYSTACK_PUBLIC_KEY', '')
+        
+        if not paystack_public_key:
+            return jsonify({
+                'success': False,
+                'message': 'Paystack not configured',
+                'hint': 'Set PAYSTACK_PUBLIC_KEY environment variable'
+            }), 200
+        
+        return jsonify({
+            'success': True,
+            'public_key': paystack_public_key
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'message': 'Server error'}), 500
+
 # PayPal Payment Integration
 @app.route('/api/paypal/create-order', methods=['POST'])
+@limiter.limit("10 per hour")
 def create_paypal_order():
     try:
         data = request.json
@@ -267,28 +361,55 @@ def capture_paypal_order(order_id):
         return jsonify({'success': False, 'message': str(e)}), 500
 
 # Seller Upload
-@app.route('/api/uploads', methods=['POST'])
-def create_upload():
-    try:
-        data = request.json
-        conn = get_db()
-        conn.execute('''
-            INSERT INTO uploads (product_name, description, price, category, seller_name, seller_email)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', (
-            data.get('product_name'),
-            data.get('description'),
-            float(data.get('price', 0)),
-            data.get('category'),
-            data.get('seller_name'),
-            data.get('seller_email')
-        ))
-        conn.commit()
-        conn.close()
-        
-        return jsonify({'success': True, 'message': 'Product uploaded for review'})
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 500
+@app.route('/api/uploads', methods=['GET', 'POST'])
+@limiter.limit("5 per hour")
+def handle_uploads():
+    if request.method == 'GET':
+        try:
+            conn = get_db()
+            uploads = conn.execute('SELECT * FROM uploads ORDER BY id DESC LIMIT 100').fetchall()
+            conn.close()
+            return jsonify([dict(upload) for upload in uploads])
+        except Exception as e:
+            return jsonify({'error': 'Server error'}), 500
+    else:
+        try:
+            data = request.json
+            
+            # Validate required fields
+            if not data.get('product_name') or not data.get('seller_email'):
+                return jsonify({'success': False, 'message': 'Missing required fields'}), 400
+            
+            # Validate email
+            if not validate_email(data.get('seller_email')):
+                return jsonify({'success': False, 'message': 'Invalid email format'}), 400
+            
+            # Validate price
+            try:
+                price = float(data.get('price', 0))
+                if price < 0 or price > 10000:
+                    return jsonify({'success': False, 'message': 'Invalid price range'}), 400
+            except ValueError:
+                return jsonify({'success': False, 'message': 'Invalid price'}), 400
+            
+            # Sanitize inputs
+            product_name = sanitize_input(data.get('product_name'), 200)
+            description = sanitize_input(data.get('description'), 1000)
+            category = sanitize_input(data.get('category'), 100)
+            seller_name = sanitize_input(data.get('seller_name'), 100)
+            seller_email = sanitize_input(data.get('seller_email'), 100)
+            
+            conn = get_db()
+            conn.execute('''
+                INSERT INTO uploads (product_name, description, price, category, seller_name, seller_email)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', (product_name, description, price, category, seller_name, seller_email))
+            conn.commit()
+            conn.close()
+            
+            return jsonify({'success': True, 'message': 'Product uploaded for review'})
+        except Exception as e:
+            return jsonify({'success': False, 'message': 'Server error'}), 500
 
 @app.errorhandler(404)
 def not_found(e):
@@ -307,9 +428,14 @@ def add_header(response):
     return response
 
 if __name__ == '__main__':
+    # Ensure database is initialized
+    print("BABYZION MARKET - Initializing database...")
+    init_db()
+    
     port = int(os.environ.get('PORT', 5000))
     debug_mode = os.environ.get('FLASK_ENV', 'production') != 'production'
     print("BABYZION MARKET - Starting server...")
     print(f"Server running on http://0.0.0.0:{port}")
     print(f"Environment: {'Development' if debug_mode else 'Production'}")
+    print(f"Access the app at: http://0.0.0.0:{port}")
     app.run(host='0.0.0.0', port=port, debug=debug_mode)

@@ -29,18 +29,23 @@
 
   <main id="admin-content" style="display:none; max-width:1200px; margin:40px auto; padding:20px;" class="grid">
     <div class="card">
-      <h3>Today's Sales: <span id="today-sales">$0.00</span></h3>
-      <p>Commission (5%): <strong id="commission">$0.00</strong></p>
+      <h3>Seller Product Uploads</h3>
+      <p>Products submitted by sellers for approval</p>
+      <div id="uploads-list"></div>
     </div>
 
     <div class="card">
-      <h3>Pending Payouts</h3>
-      <div id="payouts-list"></div>
+      <h3>CJ Dropshipping Sync</h3>
+      <p>Sync products from CJ Dropshipping API</p>
+      <input type="text" id="sync-keyword" placeholder="Search keyword (e.g., baby)" value="baby" style="width:100%; padding:12px; margin:10px 0; border-radius:25px; border:2px solid #ffd6e0;">
+      <input type="number" id="sync-count" placeholder="Number of products" value="20" min="1" max="100" style="width:100%; padding:12px; margin:10px 0; border-radius:25px; border:2px solid #ffd6e0;">
+      <button class="button" onclick="syncCJProducts()" style="width:100%;">Sync Products</button>
+      <div id="sync-status" style="margin-top:15px;"></div>
     </div>
 
     <div class="card">
-      <h3>All Orders</h3>
-      <div id="orders-list"></div>
+      <h3>All Products</h3>
+      <div id="products-list"></div>
     </div>
   </main>
 
@@ -69,54 +74,119 @@
       }
     }
 
-    function loadAdminData() {
-      const orders = JSON.parse(localStorage.getItem('all_orders') || '[]');
-      const today = new Date().toDateString();
-      let todaySales = 0;
-      let commission = 0;
-
-      const ordersList = document.getElementById('orders-list');
-      const payoutsList = document.getElementById('payouts-list');
-      ordersList.innerHTML = '';
-      payoutsList.innerHTML = '';
-
-      orders.forEach(order => {
-        if (new Date(order.date).toDateString() === today) {
-          todaySales += order.total;
-          commission += order.total * 0.05;
-        }
-
-        const orderDiv = document.createElement('div');
-        orderDiv.className = 'card';
-        orderDiv.innerHTML = `
-          <h4>Order #${order.orderId} • $${order.total.toFixed(2)}</h4>
-          <p>Buyer: ${order.shipping.name} (${order.shipping.email})</p>
-          <p>Items: ${order.items.map(i => i.name).join(', ')}</p>
-          <p>Date: ${new Date(order.date).toLocaleString()}</p>
-          ${order.paidToSeller ? '<p style="color:green;">Paid to seller</p>' : `<button class="button" onclick="payoutSeller('${order.orderId}', ${order.total * 0.95})">Pay Seller $${(order.total * 0.95).toFixed(2)}</button>`}
-        `;
-        ordersList.appendChild(orderDiv);
-
-        if (!order.paidToSeller) {
-          const payoutDiv = document.createElement('div');
-          payoutDiv.className = 'card';
-          payoutDiv.innerHTML = `<p>Order #${order.orderId} • Pay $${(order.total * 0.95).toFixed(2)}</p>`;
-          payoutsList.appendChild(payoutDiv);
-        }
-      });
-
-      document.getElementById('today-sales').textContent = `$${todaySales.toFixed(2)}`;
-      document.getElementById('commission').textContent = `$${commission.toFixed(2)}`;
+    async function loadAdminData() {
+      await loadUploads();
+      await loadProducts();
     }
 
-    function payoutSeller(orderId, amount) {
-      if (confirm(`Pay $${amount.toFixed(2)} to seller?`)) {
-        alert('Payment sent! (Simulated)');
-        const orders = JSON.parse(localStorage.getItem('all_orders') || '[]');
-        const order = orders.find(o => o.orderId === orderId);
-        if (order) order.paidToSeller = true;
-        localStorage.setItem('all_orders', JSON.stringify(orders));
-        loadAdminData();
+    async function loadUploads() {
+      const uploadsList = document.getElementById('uploads-list');
+      uploadsList.innerHTML = '<p>Loading seller uploads...</p>';
+      
+      try {
+        const response = await fetch('/api/uploads');
+        if (response.ok) {
+          const uploads = await response.json();
+          uploadsList.innerHTML = '';
+          
+          if (uploads.length === 0) {
+            uploadsList.innerHTML = '<p style="color:#999;">No seller uploads yet.</p>';
+            return;
+          }
+
+          uploads.forEach(upload => {
+            const div = document.createElement('div');
+            div.style.cssText = 'border:1px solid #ffd6e0; padding:15px; margin:10px 0; border-radius:15px;';
+            div.innerHTML = `
+              <h4>${upload.product_name}</h4>
+              <p>${upload.description}</p>
+              <p><strong>Price:</strong> $${upload.price.toFixed(2)} | <strong>Category:</strong> ${upload.category}</p>
+              <p><strong>Seller:</strong> ${upload.seller_name} (${upload.seller_email})</p>
+              <p><strong>Status:</strong> <span style="color:${upload.status === 'pending' ? 'orange' : 'green'}">${upload.status}</span></p>
+            `;
+            uploadsList.appendChild(div);
+          });
+        } else {
+          uploadsList.innerHTML = '<p style="color:#ff6b9d;">Failed to load uploads.</p>';
+        }
+      } catch (error) {
+        console.error('Error loading uploads:', error);
+        uploadsList.innerHTML = '<p style="color:#ff6b9d;">Error loading uploads.</p>';
+      }
+    }
+
+    async function loadProducts() {
+      const productsList = document.getElementById('products-list');
+      productsList.innerHTML = '<p>Loading products...</p>';
+      
+      try {
+        const response = await fetch('/api/products');
+        if (response.ok) {
+          const products = await response.json();
+          productsList.innerHTML = '';
+          
+          if (products.length === 0) {
+            productsList.innerHTML = '<p style="color:#999;">No products available.</p>';
+            return;
+          }
+
+          productsList.innerHTML = `<p><strong>Total Products:</strong> ${products.length}</p>`;
+          products.slice(0, 10).forEach(product => {
+            const div = document.createElement('div');
+            div.style.cssText = 'border:1px solid #ffd6e0; padding:10px; margin:5px 0; border-radius:10px; display:flex; gap:15px; align-items:center;';
+            div.innerHTML = `
+              <img src="${product.image || 'https://via.placeholder.com/80'}" style="width:80px; height:80px; object-fit:cover; border-radius:10px;" onerror="this.src='https://via.placeholder.com/80'">
+              <div style="flex:1;">
+                <h4 style="margin:0;">${product.name}</h4>
+                <p style="margin:5px 0; color:#666;">${product.category}</p>
+                <p style="margin:0; color:#ff6b9d; font-weight:bold;">$${product.price.toFixed(2)}</p>
+              </div>
+            `;
+            productsList.appendChild(div);
+          });
+          
+          if (products.length > 10) {
+            productsList.innerHTML += `<p style="text-align:center; margin-top:15px;">...and ${products.length - 10} more products</p>`;
+          }
+        } else {
+          productsList.innerHTML = '<p style="color:#ff6b9d;">Failed to load products.</p>';
+        }
+      } catch (error) {
+        console.error('Error loading products:', error);
+        productsList.innerHTML = '<p style="color:#ff6b9d;">Error loading products.</p>';
+      }
+    }
+
+    async function syncCJProducts() {
+      const keyword = document.getElementById('sync-keyword').value.trim() || 'baby';
+      const pageSize = parseInt(document.getElementById('sync-count').value) || 20;
+      const statusDiv = document.getElementById('sync-status');
+      
+      statusDiv.innerHTML = '<p style="color:#ff6b9d;">Syncing products from CJ Dropshipping...</p>';
+      
+      try {
+        const response = await fetch('/api/cj/sync', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ keyword, page_size: pageSize })
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+          statusDiv.innerHTML = `<p style="color:green;">✓ ${result.message}</p>`;
+          await loadProducts();
+        } else {
+          statusDiv.innerHTML = `<p style="color:orange;">⚠ ${result.message}</p>`;
+          if (result.hint) {
+            statusDiv.innerHTML += `<p style="color:#666; font-size:0.9em;">${result.hint}</p>`;
+          }
+        }
+      } catch (error) {
+        console.error('Error syncing products:', error);
+        statusDiv.innerHTML = '<p style="color:red;">✗ Failed to sync products. Check console for details.</p>';
       }
     }
   </script>

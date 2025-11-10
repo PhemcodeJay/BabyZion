@@ -10,10 +10,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // Fetch products from API
   fetch('/api/products')
     .then(response => {
-      if (!response.ok) throw new Error('Network response was not ok');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       return response.json();
     })
     .then(products => {
+      console.log('Products loaded:', products.length);
       allProducts = products;
 
       // Auto-select category from URL
@@ -30,7 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error('Error loading products:', error);
       productsGrid.innerHTML = `
         <p style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: #ff6b9d; font-size: 1.1rem;">
-          Unable to load products. Please check your connection and refresh the page.
+          ⚠️ Unable to load products. Error: ${error.message}<br>
+          Please make sure the server is running and try refreshing the page.
         </p>`;
     });
 

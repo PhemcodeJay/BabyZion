@@ -32,6 +32,10 @@
   </header>
 
   <main style="max-width:1200px; margin:40px auto; padding:20px;">
+    <div id="security-notice" style="background:#fff3cd; border:2px solid #ffc107; padding:15px; border-radius:10px; margin-bottom:20px; text-align:center;">
+      <strong>🔒 Secure Payment</strong><br>
+      <small>All transactions are encrypted and secure</small>
+    </div>
     <div class="grid" style="grid-template-columns:1fr 1fr; gap:30px;">
       <div class="card order-summary-sidebar">
         <h3>Order Summary</h3>
@@ -156,30 +160,94 @@
       };
     }
 
-    function setupPayPal() {
-      paypal.Buttons({
-        createOrder: (data, actions) => {
-          return actions.order.create({
-            purchase_units: [{ amount: { value: totalUSD.toFixed(2) } }]
-          });
-        },
-        onApprove: (data, actions) => {
-          return actions.order.capture().then(details => saveOrder('PayPal', details.id));
+    async function setupPayPal() {
+      try {
+        const response = await fetch('/api/paypal/create-order', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ amount: totalUSD })
+        });
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          document.getElementById('paypal-button-container').innerHTML = 
+            `<p style="color:orange;">⚠ ${result.message || 'PayPal not configured'}</p>
+             ${result.hint ? `<p style="color:#666; font-size:0.9em;">${result.hint}</p>` : ''}
+             <p>Please use another payment method or WhatsApp.</p>`;
+          return;
         }
-      }).render('#paypal-button-container');
+
+        paypal.Buttons({
+          createOrder: async (data, actions) => {
+            const createResponse = await fetch('/api/paypal/create-order', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ amount: totalUSD })
+            });
+            const createResult = await createResponse.json();
+            
+            if (createResult.success) {
+              return createResult.order_id;
+            } else {
+              throw new Error('Failed to create PayPal order');
+            }
+          },
+          onApprove: async (data, actions) => {
+            const captureResponse = await fetch(`/api/paypal/capture-order/${data.orderID}`, {
+              method: 'POST'
+            });
+            const captureResult = await captureResponse.json();
+            
+            if (captureResult.success) {
+              saveOrder('PayPal', data.orderID);
+            } else {
+              alert('Payment capture failed: ' + captureResult.message);
+            }
+          }
+        }).render('#paypal-button-container');
+      } catch (error) {
+        console.error('PayPal setup error:', error);
+        document.getElementById('paypal-button-container').innerHTML = 
+          '<p style="color:#ff6b9d;">PayPal setup failed. Please use another payment method.</p>';
+      }
     }
 
-    function setupPaystack() {
-      document.getElementById('paystack-btn').onclick = () => {
-        let handler = PaystackPop.setup({
-          key: 'pk_test_xxxxxxxx', // Replace with your key
-          email: JSON.parse(localStorage.getItem('shipping_info')).email,
-          amount: totalUSD * 100,
-          ref: orderRef,
-          callback: (response) => saveOrder('Paystack', response.reference),
-          onClose: () => alert('Payment cancelled')
-        });
-        handler.openIframe();
+    async function setupPaystack() {
+      document.getElementById('paystack-btn').onclick = async () => {
+        try {
+          const response = await fetch('/api/paystack/initialize', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: JSON.parse(localStorage.getItem('shipping_info')).email,
+              amount: totalUSD
+            })
+          });
+          
+          const result = await response.json();
+          
+          if (!result.success) {
+            alert(result.message || 'Paystack not configured. Please use another payment method.');
+            return;
+          }
+          
+          let handler = PaystackPop.setup({
+            key: result.public_key,
+            email: JSON.parse(localStorage.getItem('shipping_info')).email,
+            amount: totalUSD * 100,
+            ref: orderRef,
+            callback: (response) => saveOrder('Paystack', response.reference),
+            onClose: () => alert('Payment cancelled')
+          });
+          handler.openIframe();
+        } catch (error) {
+          alert('Payment setup failed. Please try another method.');
+        }
       };
     }
 

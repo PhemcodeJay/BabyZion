@@ -102,46 +102,45 @@
     });
 
     // Form Submission
-    document.getElementById('upload-form').addEventListener('submit', function(e) {
+    document.getElementById('upload-form').addEventListener('submit', async function(e) {
       e.preventDefault();
 
       const sellerPrice = parseFloat(document.getElementById('price').value);
       const platformPrice = (sellerPrice * 1.05).toFixed(2);
 
-      // Get image (fallback to placeholder if none)
-      const imageInput = document.getElementById('image-upload');
-      let imageUrl = 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400&h=400&fit=crop';
-      if (imageInput.files[0]) {
-        imageUrl = URL.createObjectURL(imageInput.files[0]);
-      }
-
-      const product = {
-        id: 'seller_' + Date.now(),
-        name: document.getElementById('product-name').value.trim(),
+      const uploadData = {
+        product_name: document.getElementById('product-name').value.trim(),
         description: document.getElementById('description').value.trim(),
         price: parseFloat(platformPrice),
-        originalPrice: sellerPrice,
         category: document.getElementById('category').value,
-        image: imageUrl,
-        in_stock: 1,
-        approved: false,
-        seller: {
-          name: document.getElementById('seller-name').value.trim(),
-          phone: document.getElementById('seller-phone').value || 'Not provided'
-        },
-        uploadedAt: new Date().toISOString()
+        seller_name: document.getElementById('seller-name').value.trim(),
+        seller_email: document.getElementById('seller-phone').value || 'Not provided'
       };
 
-      // Save to localStorage
-      let sellerProducts = JSON.parse(localStorage.getItem('seller_products') || '[]');
-      sellerProducts.push(product);
-      localStorage.setItem('seller_products', JSON.stringify(sellerProducts));
+      try {
+        const response = await fetch('/api/uploads', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(uploadData)
+        });
 
-      // Show success
-      document.getElementById('original-price').textContent = sellerPrice.toFixed(2);
-      document.getElementById('final-price').textContent = platformPrice;
-      document.getElementById('upload-form').style.display = 'none';
-      document.getElementById('success-message').style.display = 'block';
+        const result = await response.json();
+
+        if (result.success) {
+          // Show success
+          document.getElementById('original-price').textContent = sellerPrice.toFixed(2);
+          document.getElementById('final-price').textContent = platformPrice;
+          document.getElementById('upload-form').style.display = 'none';
+          document.getElementById('success-message').style.display = 'block';
+        } else {
+          alert('Upload failed: ' + (result.message || 'Please try again'));
+        }
+      } catch (error) {
+        console.error('Upload error:', error);
+        alert('Failed to submit product. Please try again or contact us via WhatsApp.');
+      }
     });
   </script>
 

@@ -42,18 +42,18 @@
       <div class="card shipping-form-container">
         <form id="shipping-form">
           <h2>Contact Information</h2>
-          
+
           <label for="name">Full Name *</label>
           <input type="text" id="name" required placeholder="John Doe">
-          
+
           <label for="email">Email Address *</label>
           <input type="email" id="email" required placeholder="john@example.com">
-          
+
           <label for="phone">Phone Number *</label>
           <input type="tel" id="phone" required placeholder="+254 700 000 000">
 
           <h2>Shipping Address</h2>
-          
+
           <label for="country">Country *</label>
           <select id="country" required>
             <option value="">Select Country</option>
@@ -66,16 +66,16 @@
             <option value="South Africa">South Africa</option>
             <option value="Other">Other</option>
           </select>
-          
+
           <label for="city">City *</label>
           <input type="text" id="city" required placeholder="Nairobi">
-          
+
           <label for="address">Street Address *</label>
           <input type="text" id="address" required placeholder="123 Baby Street, Apt 4B">
-          
+
           <label for="postal">Postal/ZIP Code</label>
           <input type="text" id="postal" placeholder="00100">
-          
+
           <label for="notes">Delivery Notes (Optional)</label>
           <textarea id="notes" rows="3" placeholder="Any special instructions?"></textarea>
 
@@ -119,19 +119,46 @@
       const saved = JSON.parse(localStorage.getItem('shipping_info') || '{}');
       Object.keys(saved).forEach(k => document.getElementById(k)?.value = saved[k]);
 
-      document.getElementById('shipping-form').onsubmit = e => {
+      const form = document.getElementById('shipping-form');
+      form.onsubmit = (e) => {
         e.preventDefault();
-        const data = {
-          name: document.getElementById('name').value,
-          email: document.getElementById('email').value,
-          phone: document.getElementById('phone').value,
-          country: document.getElementById('country').value,
-          city: document.getElementById('city').value,
-          address: document.getElementById('address').value,
-          postal: document.getElementById('postal').value,
-          notes: document.getElementById('notes').value
+
+        // Validate email
+        const email = document.getElementById('email').value;
+        const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailPattern.test(email)) {
+          alert('Please enter a valid email address');
+          return;
+        }
+
+        // Validate phone
+        const phone = document.getElementById('phone').value;
+        const phonePattern = /^\+?[0-9]{10,15}$/;
+        if (!phonePattern.test(phone.replace(/[\s-]/g, ''))) {
+          alert('Please enter a valid phone number (10-15 digits)');
+          return;
+        }
+
+        // Validate required fields
+        const name = document.getElementById('name').value.trim();
+        const address = document.getElementById('address').value.trim();
+        const city = document.getElementById('city').value.trim();
+        const country = document.getElementById('country').value.trim();
+
+        if (!name || !address || !city || !country) {
+          alert('Please fill in all required fields');
+          return;
+        }
+
+        const formData = {
+          name: name.substring(0, 100),
+          email: email.substring(0, 100),
+          phone: phone.substring(0, 20),
+          address: address.substring(0, 200),
+          city: city.substring(0, 100),
+          country: country.substring(0, 100)
         };
-        localStorage.setItem('shipping_info', JSON.stringify(data));
+        localStorage.setItem('shipping_info', JSON.stringify(formData));
         window.location.href = 'payment.html';
       };
     });

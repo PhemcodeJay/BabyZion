@@ -1,0 +1,140 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Collections - BABYZION MARKET</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <meta property="og:title" content="BABYZION MARKET - Collections">
+  <meta property="og:description" content="Browse our curated baby product collections">
+</head>
+<body class="gradient">
+  <header>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">Our Story</a></li>
+        <li><a href="collections.html" class="active">Collections</a></li>
+        <li><a href="products.html">Shop All</a></li>
+        <li><a href="upload.html">Sell With Us</a></li>
+        <li><a href="cart.html">🛒 Cart (<span class="cart-count">0</span>)</a></li>
+      </ul>
+    </nav>
+    <div class="logo-container">
+      <img src="logo.png" alt="BABYZION MARKET" class="header-logo">
+    </div>
+    <h1>Shop by Collection</h1>
+    <p class="tagline">Curated with love for your little star</p>
+  </header>
+
+  <main style="max-width: 1200px; margin: 40px auto; padding: 20px;">
+    <section class="featured-categories">
+      <div class="categories-grid">
+        <!-- Newborn Essentials -->
+        <div class="category-card" onclick="navigateToCategory('Newborn Essentials')" style="cursor: pointer;">
+          <div class="card-inner">
+            <div class="icon-bounce">👶</div>
+            <h3>Newborn Essentials</h3>
+            <p>Soft blankets, onesies & first smiles</p>
+            <span class="magic-btn">
+              <span>Explore Newborn</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Cultural Baby Wear -->
+        <div class="category-card" onclick="navigateToCategory('Cultural Baby Wear')" style="cursor: pointer;">
+          <div class="card-inner">
+            <div class="icon-bounce">🌍</div>
+            <h3>Cultural Baby Wear</h3>
+            <p>Dirac, Ankara, Eid outfits & heritage</p>
+            <span class="magic-btn">
+              <span>Celebrate Culture</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Wooden Toys -->
+        <div class="category-card" onclick="navigateToCategory('Wooden Toys')" style="cursor: pointer;">
+          <div class="card-inner">
+            <div class="icon-bounce">🧸</div>
+            <h3>Wooden Toys</h3>
+            <p>Montessori, rattles & eco-friendly play</p>
+            <span class="magic-btn">
+              <span>Play & Learn</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Mom & Baby Sets -->
+        <div class="category-card" onclick="navigateToCategory('Mom & Baby Sets')" style="cursor: pointer;">
+          <div class="card-inner">
+            <div class="icon-bounce">👩‍👶</div>
+            <h3>Mom & Baby Sets</h3>
+            <p>Matching outfits for you and your mini</p>
+            <span class="magic-btn">
+              <span>Match with Me</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Feeding & Nursing -->
+        <div class="category-card" onclick="navigateToCategory('Feeding & Nursing')" style="cursor: pointer;">
+          <div class="card-inner">
+            <div class="icon-bounce">🍼</div>
+            <h3>Feeding & Nursing</h3>
+            <p>Bottles, bibs & happy tummies</p>
+            <span class="magic-btn">
+              <span>Feed with Love</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Educational Toys -->
+        <div class="category-card" onclick="navigateToCategory('Educational Toys')" style="cursor: pointer;">
+          <div class="card-inner">
+            <div class="icon-bounce">📚</div>
+            <h3>Educational Toys</h3>
+            <p>Learning through play & discovery</p>
+            <span class="magic-btn">
+              <span>Discover & Learn</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div style="text-align: center; margin-top: 40px;">
+      <a href="products.html" class="button" style="font-size: 1.2em; padding: 15px 40px;">
+        🛍️ Browse All Products
+      </a>
+    </div>
+  </main>
+
+  <a href="https://wa.me/254700000000?text=Hi!%20I%20saw%20your%20baby%20items%20on%20BABYZION%20MARKET%20-%20can%20I%20order?" 
+     class="whatsapp-float" target="_blank">
+    Order Now
+  </a>
+
+  <footer>
+    <p>© 2025 BABYZION MARKET • Made with love for little ones</p>
+  </footer>
+
+  <script src="cart.js"></script>
+  <script>
+    function navigateToCategory(category) {
+      // Smooth transition to products page
+      window.location.href = 'products.html?category=' + encodeURIComponent(category);
+    }
+
+    // Update cart count on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      const cart = JSON.parse(localStorage.getItem('babyzion_cart') || '[]');
+      const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+      document.querySelectorAll('.cart-count').forEach(el => el.textContent = count);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sell With Us - BABYZION MARKET</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <meta property="og:title" content="BABYZION MARKET">
+  <meta property="og:description" content="Adorable, safe & stylish baby clothes, toys, and essentials.">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="gradient">
+
+  <header>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">Our Story</a></li>
+        <li><a href="collections.html">Collections</a></li>
+        <li><a href="products.html">Shop All</a></li>
+        <li><a href="upload.html" class="active">Sell With Us</a></li>
+        <li><a href="cart.html">Cart (<span class="cart-count">0</span>)</a></li>
+      </ul>
+    </nav>
+    <div class="logo-container">
+      <img src="logo.png" alt="BABYZION MARKET" class="header-logo">
+    </div>
+    <h1>Sell Your Baby Items</h1>
+    <p class="tagline">Join thousands of moms earning from home</p>
+  </header>
+
+  <main style="max-width: 600px; margin: 40px auto; padding: 20px;">
+    <div class="card" style="padding: 30px; border-radius: 25px;">
+      
+      <form id="upload-form">
+        <h2 style="text-align:center; color:#ff6b9d; margin-bottom:20px;">List Your Product</h2>
+
+        <input type="text" id="product-name" placeholder="Product Name *" required>
+        <textarea id="description" placeholder="Description (why moms will love it) *" required rows="4"></textarea>
+        <input type="number" step="0.01" id="price" placeholder="Your Price (USD) *" required>
+        
+        <select id="category" required style="width:100%; padding:12px; border-radius:15px; border:1px solid #ffd6e0; margin:10px 0;">
+          <option value="">Choose Category *</option>
+          <option>Newborn Essentials</option>
+          <option>Cultural Baby Wear</option>
+          <option>Wooden Toys</option>
+          <option>Mom & Baby Sets</option>
+          <option>Feeding & Nursing</option>
+        </select>
+
+        <input type="text" id="seller-name" placeholder="Your Full Name *" required>
+        <input type="tel" id="seller-phone" placeholder="WhatsApp Number (e.g. +254700000000)">
+        
+        <div style="text-align:center; margin:20px 0;">
+          <label style="background:#ffd6e0; padding:15px 30px; border-radius:50px; cursor:pointer; font-weight:600;">
+            Upload Photo
+            <input type="file" id="image-upload" accept="image/*" style="display:none;">
+          </label>
+          <div id="image-preview" style="margin-top:15px; border-radius:15px; overflow:hidden; display:none;">
+            <img id="preview-img" style="width:100%; max-height:250px; object-fit:cover;">
+          </div>
+        </div>
+
+        <button type="submit" class="button" style="width:100%; padding:16px; font-size:1.1rem; margin-top:10px;">
+          Submit for Review
+        </button>
+      </form>
+
+      <div id="success-message" style="display:none; text-align:center; padding:30px;">
+        <h2 style="color:#25d366;">Submitted Successfully!</h2>
+        <p>Your price: <strong>$<span id="original-price"></span></strong></p>
+        <p>Price on site: <strong>$<span id="final-price"></span></strong> <small>(+5% platform fee)</small></p>
+        <p>We’ll review and approve within 24 hours</p>
+        <a href="products.html" class="button" style="margin-top:15px;">Continue Shopping</a>
+      </div>
+
+    </div>
+  </main>
+
+  <a href="https://wa.me/254700000000?text=Hi! I want to sell my baby items on BABYZION MARKET" 
+     class="whatsapp-float" target="_blank">Sell via WhatsApp</a>
+
+  <footer>
+    <p>© 2025 BABYZION MARKET • Made with love for little ones</p>
+  </footer>
+
+  <script src="cart.js"></script>
+  <script>
+    // Image Preview
+    document.getElementById('image-upload').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const preview = document.getElementById('preview-img');
+          preview.src = e.target.result;
+          document.getElementById('image-preview').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Form Submission
+    document.getElementById('upload-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const sellerPrice = parseFloat(document.getElementById('price').value);
+      const platformPrice = (sellerPrice * 1.05).toFixed(2);
+
+      // Get image (fallback to placeholder if none)
+      const imageInput = document.getElementById('image-upload');
+      let imageUrl = 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400&h=400&fit=crop';
+      if (imageInput.files[0]) {
+        imageUrl = URL.createObjectURL(imageInput.files[0]);
+      }
+
+      const product = {
+        id: 'seller_' + Date.now(),
+        name: document.getElementById('product-name').value.trim(),
+        description: document.getElementById('description').value.trim(),
+        price: parseFloat(platformPrice),
+        originalPrice: sellerPrice,
+        category: document.getElementById('category').value,
+        image: imageUrl,
+        in_stock: 1,
+        approved: false,
+        seller: {
+          name: document.getElementById('seller-name').value.trim(),
+          phone: document.getElementById('seller-phone').value || 'Not provided'
+        },
+        uploadedAt: new Date().toISOString()
+      };
+
+      // Save to localStorage
+      let sellerProducts = JSON.parse(localStorage.getItem('seller_products') || '[]');
+      sellerProducts.push(product);
+      localStorage.setItem('seller_products', JSON.stringify(sellerProducts));
+
+      // Show success
+      document.getElementById('original-price').textContent = sellerPrice.toFixed(2);
+      document.getElementById('final-price').textContent = platformPrice;
+      document.getElementById('upload-form').style.display = 'none';
+      document.getElementById('success-message').style.display = 'block';
+    });
+  </script>
+
+  <style>
+    input, textarea, select {
+      width: 100%;
+      padding: 14px;
+      margin: 10px 0;
+      border-radius: 15px;
+      border: 2px solid #ffd6e0;
+      font-family: 'Poppins', sans-serif;
+      font-size: 1rem;
+    }
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: #ff90b3;
+      box-shadow: 0 0 10px rgba(255, 144, 179, 0.3);
+    }
+    ::placeholder {
+      color: #aaa;
+    }
+  </style>
+</body>
+</html>

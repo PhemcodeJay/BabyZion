@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Payment - BABYZION MARKET</title>
+  <link rel="stylesheet" href="styles.css"><link rel="icon" type="image/png" href="favicon.png">
+  <meta property="og:title" content="BABYZION MARKET">
+  <meta property="og:description" content="Adorable, safe & stylish baby clothes, toys, and essentials.">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD"></script>
+  <script src="https://js.paystack.co/v1/inline.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body class="gradient">
+  <header>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">Our Story</a></li>
+        <li><a href="collections.html">Collections</a></li>
+        <li><a href="products.html">Shop All</a></li>
+        <li><a href="upload.html">Sell With Us</a></li>
+        <li><a href="cart.html">🛒 Cart (<span class="cart-count">0</span>)</a></li>
+      </ul>
+    </nav>
+    <div class="logo-container">
+      <img src="logo.png" alt="BABYZION MARKET" class="header-logo">
+    </div>
+    <h1>Secure Payment</h1>
+    <p class="tagline">Pay safely from anywhere</p>
+  </header>
+
+  <main style="max-width:1200px; margin:40px auto; padding:20px;">
+    <div class="grid" style="grid-template-columns:1fr 1fr; gap:30px;">
+      <div class="card order-summary-sidebar">
+        <h3>Order Summary</h3>
+        <div id="summary-items"></div>
+        <hr>
+        <div class="summary-row"><span>Subtotal:</span> <span id="order-subtotal">$0.00</span></div>
+        <div class="summary-row"><span>Shipping:</span> <span>$12.00</span></div>
+        <hr>
+        <div class="summary-row total"><strong>Total:</strong> <strong id="order-total">$0.00 USD</strong></div>
+        <small id="kes-equivalent" style="display:block;text-align:right;"></small>
+        <div class="shipping-info">
+          <h4>Shipping To:</h4>
+          <p id="ship-to"></p>
+        </div>
+      </div>
+
+      <div class="card payment-form-container">
+        <div class="filter-section" id="payment-tabs" style="display:flex; flex-wrap:wrap; justify-content:center; gap:10px;">
+          <button class="filter-btn active" data-method="mpesa">M-PESA</button>
+          <button class="filter-btn" data-method="paypal">PayPal</button>
+          <button class="filter-btn" data-method="paystack">Paystack</button>
+          <button class="filter-btn" data-method="crypto">USDT</button>
+          <button class="filter-btn" data-method="whatsapp">WhatsApp</button>
+        </div>
+
+        <div id="mpesa-payment" class="payment-method-content">
+          <h3>M-PESA STK Push</h3>
+          <p>Enter phone for push:</p>
+          <input type="tel" id="mpesa-phone-input" placeholder="+254700000000">
+          <button class="button" id="mpesa-pay-btn">Send Push</button>
+          <p id="mpesa-status"></p>
+        </div>
+
+        <div id="paypal-payment" class="payment-method-content" style="display:none;">
+          <h3>PayPal</h3>
+          <div id="paypal-button-container"></div>
+        </div>
+
+        <div id="paystack-payment" class="payment-method-content" style="display:none;">
+          <h3>Paystack</h3>
+          <button class="button" id="paystack-btn">Pay Now</button>
+        </div>
+
+        <div id="crypto-payment" class="payment-method-content" style="display:none;">
+          <h3>USDT (TRC20)</h3>
+          <code id="usdt-wallet">TXk9vM1234567890abcdef1234567890</code>
+          <p>Amount: <strong id="usdt-amount">$0.00 USDT</strong></p>
+          <button class="button" onclick="copyWallet()">Copy Address</button>
+        </div>
+
+        <div id="whatsapp-payment" class="payment-method-content" style="display:none;">
+          <h3>Pay via WhatsApp</h3>
+          <a id="whatsapp-order-link" class="button" style="background:#25d366;">Order on WhatsApp</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2025 BABYZION MARKET • Made with love for little ones</p>
+  </footer>
+
+  <script>
+    let totalUSD = 0;
+    let totalKES = 0;
+    const KES_RATE = 130; // Mock rate
+    const orderRef = 'BZ' + Date.now().toString().slice(-6);
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const cart = JSON.parse(localStorage.getItem('babyzion_cart') || '[]');
+      const shipping = JSON.parse(localStorage.getItem('shipping_info') || '{}');
+      const summaryItems = document.getElementById('summary-items');
+      let subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
+      totalUSD = subtotal + 12;
+      totalKES = Math.round(totalUSD * KES_RATE);
+
+      cart.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'summary-row';
+        div.innerHTML = `<span>${item.name} x${item.quantity}</span><span>$${ (item.price * item.quantity).toFixed(2) }</span>`;
+        summaryItems.appendChild(div);
+      });
+
+      document.getElementById('order-subtotal').textContent = `$${subtotal.toFixed(2)}`;
+      document.getElementById('order-total').textContent = `$${totalUSD.toFixed(2)} USD`;
+      document.getElementById('kes-equivalent').textContent = `(≈ KES ${totalKES})`;
+      document.getElementById('ship-to').innerHTML = `${shipping.name}<br>${shipping.address}<br>${shipping.city}, ${shipping.country}<br>${shipping.phone}`;
+
+      // Tabs
+      document.querySelectorAll('[data-method]').forEach(btn => btn.onclick = () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.payment-method-content').forEach(d => d.style.display = 'none');
+        document.getElementById(btn.dataset.method + '-payment').style.display = 'block';
+      });
+
+      setupMpesa();
+      setupPayPal();
+      setupPaystack();
+      setupCrypto();
+      setupWhatsApp(cart, shipping);
+    });
+
+    function setupMpesa() {
+      const btn = document.getElementById('mpesa-pay-btn');
+      btn.onclick = async () => {
+        btn.disabled = true;
+        btn.textContent = 'Sending...';
+        const phone = document.getElementById('mpesa-phone-input').value;
+
+        // Simulate STK Push (in production: call Daraja API)
+        try {
+          // Mock API call
+          console.log('STK Push to ' + phone + ' for KES ' + totalKES);
+          document.getElementById('mpesa-status').innerHTML = '<span style="color:green;">STK Push sent! Check phone and enter PIN.</span>';
+          setTimeout(() => saveOrder('M-PESA', orderRef), 5000); // Simulate success
+        } catch {
+          document.getElementById('mpesa-status').innerHTML = '<span style="color:red;">Failed. Try again or use WhatsApp.</span>';
+          btn.disabled = false;
+          btn.textContent = 'Send Push';
+        }
+      };
+    }
+
+    function setupPayPal() {
+      paypal.Buttons({
+        createOrder: (data, actions) => {
+          return actions.order.create({
+            purchase_units: [{ amount: { value: totalUSD.toFixed(2) } }]
+          });
+        },
+        onApprove: (data, actions) => {
+          return actions.order.capture().then(details => saveOrder('PayPal', details.id));
+        }
+      }).render('#paypal-button-container');
+    }
+
+    function setupPaystack() {
+      document.getElementById('paystack-btn').onclick = () => {
+        let handler = PaystackPop.setup({
+          key: 'pk_test_xxxxxxxx', // Replace with your key
+          email: JSON.parse(localStorage.getItem('shipping_info')).email,
+          amount: totalUSD * 100,
+          ref: orderRef,
+          callback: (response) => saveOrder('Paystack', response.reference),
+          onClose: () => alert('Payment cancelled')
+        });
+        handler.openIframe();
+      };
+    }
+
+    function setupCrypto() {
+      document.getElementById('usdt-amount').textContent = `${totalUSD.toFixed(2)} USDT`;
+    }
+
+    function copyWallet() {
+      navigator.clipboard.writeText(document.getElementById('usdt-wallet').textContent);
+      alert('Copied!');
+    }
+
+    function setupWhatsApp(cart, shipping) {
+      let msg = 'Hi BABYZION! I want to order:\n';
+      cart.forEach(i => msg += `- ${i.name} x${i.quantity} ($${i.price.toFixed(2)} each)\n`);
+      msg += `\nTotal: $${totalUSD.toFixed(2)}\nShipping to: ${shipping.name}, ${shipping.address}, ${shipping.city}, ${shipping.country}\nPhone: ${shipping.phone}`;
+      document.getElementById('whatsapp-order-link').href = `https://wa.me/254700000000?text=${encodeURIComponent(msg)}`;
+    }
+
+    function saveOrder(method, ref) {
+      const order = {
+        orderId: ref,
+        method: method,
+        total: totalUSD,
+        items: JSON.parse(localStorage.getItem('babyzion_cart') || '[]'),
+        shipping: JSON.parse(localStorage.getItem('shipping_info') || '{}'),
+        date: new Date().toISOString(),
+        paidToSeller: false
+      };
+
+      let allOrders = JSON.parse(localStorage.getItem('all_orders') || '[]');
+      allOrders.push(order);
+      localStorage.setItem('all_orders', JSON.stringify(allOrders));
+
+      // Clear cart
+      localStorage.removeItem('babyzion_cart');
+      localStorage.removeItem('shipping_info');
+
+      window.location.href = `order-complete.html?order=${ref}`;
+    }
+  </script>
+
+  <style>
+    .summary-row { display: flex; justify-content: space-between; margin: 10px 0; }
+    .total { font-weight: bold; color: #ff6b9d; }
+    input { width: 100%; padding: 12px; border-radius: 25px; border: 2px solid #ffd6e0; margin: 10px 0; }
+    .payment-method-content { padding: 20px; text-align: center; }
+    @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</body>
+</html>

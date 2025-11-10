@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BABYZION MARKET - Premium Baby Essentials</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <meta property="og:title" content="BABYZION MARKET">
+  <meta property="og:description" content="Adorable, safe & stylish baby clothes, toys, and essentials.">
+</head>
+<body class="gradient">
+  <header>
+    <nav>
+      <ul>
+        <li><a href="index.html" class="active">Home</a></li>
+        <li><a href="about.html">Our Story</a></li>
+        <li><a href="collections.html">Collections</a></li>
+        <li><a href="products.html">Shop All</a></li>
+        <li><a href="upload.html">Sell With Us</a></li>
+        <li><a href="cart.html">Cart (<span class="cart-count">0</span>)</a></li>
+      </ul>
+    </nav>
+    <div class="logo-container">
+      <img src="logo.png" alt="BABYZION MARKET" class="header-logo">
+    </div>
+    <h1>BABYZION MARKET</h1>
+    <p class="tagline">Where Every Baby Deserves the Best</p>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h2>Newborn • Toddler • Mom-Approved</h2>
+      <p>Handpicked baby clothes, organic cotton onesies, wooden toys & more.</p>
+      <a href="products.html" class="button">Shop Now</a>
+    </section>
+
+    <!-- Featured Categories -->
+    <section class="featured-categories">
+      <div class="section-title">
+        <h2>Shop by Collection</h2>
+        <p class="subtitle">Handpicked with love for your little star</p>
+      </div>
+
+      <div class="categories-grid">
+        <!-- Newborn Essentials -->
+        <div class="category-card" data-category="Newborn Essentials">
+          <div class="card-inner">
+            <div class="icon-bounce">Newborn</div>
+            <h3>Newborn Essentials</h3>
+            <p>Soft blankets, onesies & first smiles</p>
+            <a href="#" onclick="navigateToCategory('Newborn Essentials'); return false;" class="magic-btn">
+              <span>Explore Newborn</span>
+              <div class="sparkle">Sparkle</div>
+            </a>
+          </div>
+        </div>
+
+        <!-- Cultural Baby Wear -->
+        <div class="category-card" data-category="Cultural Baby Wear">
+          <div class="card-inner">
+            <div class="icon-bounce">Cultural</div>
+            <h3>Cultural Baby Wear</h3>
+            <p>Dirac, Ankara, Eid outfits & heritage</p>
+            <a href="#" onclick="navigateToCategory('Cultural Baby Wear'); return false;" class="magic-btn">
+              <span>Celebrate Culture</span>
+              <div class="sparkle">Sparkle</div>
+            </a>
+          </div>
+        </div>
+
+        <!-- Wooden Toys -->
+        <div class="category-card" data-category="Wooden Toys">
+          <div class="card-inner">
+            <div class="icon-bounce">Toys</div>
+            <h3>Wooden Toys</h3>
+            <p>Montessori, rattles & eco-friendly play</p>
+            <a href="#" onclick="navigateToCategory('Wooden Toys'); return false;" class="magic-btn">
+              <span>Play & Learn</span>
+              <div class="sparkle">Sparkle</div>
+            </a>
+          </div>
+        </div>
+
+        <!-- Mom & Baby Sets -->
+        <div class="category-card" data-category="Mom & Baby Sets">
+          <div class="card-inner">
+            <div class="icon-bounce">Mom & Baby</div>
+            <h3>Mom & Baby Sets</h3>
+            <p>Matching outfits for you and your mini</p>
+            <a href="#" onclick="navigateToCategory('Mom & Baby Sets'); return false;" class="magic-btn">
+              <span>Match with Me</span>
+              <div class="sparkle">Sparkle</div>
+            </a>
+          </div>
+        </div>
+
+        <!-- Feeding & Nursing -->
+        <div class="category-card" data-category="Feeding & Nursing">
+          <div class="card-inner">
+            <div class="icon-bounce">Feeding</div>
+            <h3>Feeding & Nursing</h3>
+            <p>Bibs, bottles, pillows & happy tummies</p>
+            <a href="#" onclick="navigateToCategory('Feeding & Nursing'); return false;" class="magic-btn">
+              <span>Feed with Love</span>
+              <div class="sparkle">Sparkle</div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Featured Products Section -->
+    <section class="featured-products" id="featured-section" style="text-align: center; padding: 60px 20px; background: white; margin: 40px 0; border-radius: 30px; scroll-margin-top: 80px;">
+      <h2 style="color: #ff6b9d; font-size: 2.5em; margin-bottom: 20px;">Featured Products</h2>
+      <p style="color: #666; font-size: 1.1em; margin-bottom: 30px;">Handpicked favorites for your little one</p>
+      <div id="featured-products" class="products-grid"></div>
+      <a href="products.html" class="button" style="margin-top: 30px; font-size: 1.1em;">View All Products</a>
+    </section>
+  </main>
+
+  <a href="https://wa.me/254700000000?text=Hi!%20I%20saw%20your%20baby%20items%20on%20BABYZION%20MARKET%20-%20can%20I%20order?" 
+     class="whatsapp-float" target="_blank">
+    Order Now
+  </a>
+
+  <footer>
+    <p>© 2025 BABYZION MARKET • Made with love for little ones</p>
+  </footer>
+
+  <script src="cart.js"></script>
+  <script>
+    function navigateToCategory(category) {
+      window.location.href = 'products.html?category=' + encodeURIComponent(category);
+    }
+
+    // Simple HTML escape
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const featuredContainer = document.getElementById('featured-products');
+
+      fetch('/api/products')
+        .then(res => {
+          if (!res.ok) throw new Error('Network error');
+          return res.json();
+        })
+        .then(allProducts => {
+          const featured = allProducts.slice(0, 6);
+
+          if (featured.length === 0) {
+            featuredContainer.innerHTML = '<p style="color:#999;">No featured products yet.</p>';
+            return;
+          }
+
+          featured.forEach(p => {
+            const div = document.createElement('div');
+            div.className = 'product-card';
+            div.innerHTML = `
+              <img src="${p.image || 'https://via.placeholder.com/300x300?text=Baby+Product'}" 
+                   alt="${escapeHtml(p.name)}" loading="lazy"
+                   onerror="this.src='https://via.placeholder.com/300x300?text=No+Image'; this.onerror=null;">
+              <h3>${escapeHtml(p.name)}</h3>
+              <p>${escapeHtml((p.description || '').substring(0, 80))}...</p>
+              <div class="price">
+                $${Number(p.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </div>
+              <button class="add-to-cart-btn" 
+                      data-id="${p.id}" 
+                      data-name="${escapeHtml(p.name)}" 
+                      data-price="${p.price}"
+                      data-image="${p.image || 'https://via.placeholder.com/300x300?text=Baby+Product'}">
+                Add to Cart
+              </button>
+            `;
+            featuredContainer.appendChild(div);
+          });
+
+          // Add to cart functionality
+          document.querySelectorAll('#featured-products .add-to-cart-btn').forEach(btn => {
+            btn.addEventListener('click', e => {
+              e.preventDefault();
+
+              let cart = JSON.parse(localStorage.getItem('babyzion_cart') || '[]');
+              const item = {
+                id: btn.dataset.id,
+                name: btn.dataset.name,
+                price: parseFloat(btn.dataset.price),
+                image: btn.dataset.image,
+                quantity: 1
+              };
+
+              const existing = cart.find(i => i.id === item.id);
+              if (existing) existing.quantity += 1;
+              else cart.push(item);
+
+              localStorage.setItem('babyzion_cart', JSON.stringify(cart));
+
+              // Update cart count everywhere
+              const total = cart.reduce((sum, i) => sum + i.quantity, 0);
+              document.querySelectorAll('.cart-count').forEach(el => el.textContent = total);
+
+              // Success feedback
+              const origText = btn.textContent;
+              const origBg = btn.style.background;
+              btn.textContent = 'Added!';
+              btn.style.background = '#28a745';
+              btn.disabled = true;
+
+              setTimeout(() => {
+                btn.textContent = origText;
+                btn.style.background = origBg;
+                btn.disabled = false;
+              }, 2000);
+            });
+          });
+        })
+        .catch(err => {
+          console.error(err);
+          featuredContainer.innerHTML = '<p style="color:#ff6b9d;">Unable to load products. Please try again later.</p>';
+        });
+    });
+  </script>
+</body>
+</html>

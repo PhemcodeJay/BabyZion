@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - BABYZION MARKET</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <meta property="og:title" content="BABYZION MARKET">
+  <meta property="og:description" content="Adorable, safe & stylish baby clothes, toys, and essentials.">
+</head>
+<body class="gradient">
+
+  <header>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="products.html">Shop All</a></li>
+        <li><a href="admin.html" class="active">Admin</a></li>
+      </ul>
+    </nav>
+    <div class="logo-container">
+      <img src="logo.png" alt="BABYZION MARKET" class="header-logo">
+    </div>
+    <h1>Admin Dashboard</h1>
+    <p class="tagline">Manage your marketplace</p>
+  </header>
+
+  <main id="admin-content" style="display:none; max-width:1200px; margin:40px auto; padding:20px;" class="grid">
+    <div class="card">
+      <h3>Today's Sales: <span id="today-sales">$0.00</span></h3>
+      <p>Commission (5%): <strong id="commission">$0.00</strong></p>
+    </div>
+
+    <div class="card">
+      <h3>Pending Payouts</h3>
+      <div id="payouts-list"></div>
+    </div>
+
+    <div class="card">
+      <h3>All Orders</h3>
+      <div id="orders-list"></div>
+    </div>
+  </main>
+
+  <div id="login-form" style="max-width:400px; margin:40px auto;">
+    <div class="card">
+      <h3>Admin Login</h3>
+      <input type="password" id="admin-pass" placeholder="Enter password" style="width:100%; padding:12px; margin:10px 0; border-radius:25px; border:2px solid #ffd6e0;">
+      <button class="button" onclick="login()" style="width:100%;">Login</button>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2025 BABYZION MARKET • Made with love for little ones</p>
+  </footer>
+
+  <script>
+    const ADMIN_PASS = "babyzion2025";
+
+    function login() {
+      if (document.getElementById('admin-pass').value === ADMIN_PASS) {
+        document.getElementById('login-form').style.display = 'none';
+        document.getElementById('admin-content').style.display = 'grid';
+        loadAdminData();
+      } else {
+        alert('Wrong password!');
+      }
+    }
+
+    function loadAdminData() {
+      const orders = JSON.parse(localStorage.getItem('all_orders') || '[]');
+      const today = new Date().toDateString();
+      let todaySales = 0;
+      let commission = 0;
+
+      const ordersList = document.getElementById('orders-list');
+      const payoutsList = document.getElementById('payouts-list');
+      ordersList.innerHTML = '';
+      payoutsList.innerHTML = '';
+
+      orders.forEach(order => {
+        if (new Date(order.date).toDateString() === today) {
+          todaySales += order.total;
+          commission += order.total * 0.05;
+        }
+
+        const orderDiv = document.createElement('div');
+        orderDiv.className = 'card';
+        orderDiv.innerHTML = `
+          <h4>Order #${order.orderId} • $${order.total.toFixed(2)}</h4>
+          <p>Buyer: ${order.shipping.name} (${order.shipping.email})</p>
+          <p>Items: ${order.items.map(i => i.name).join(', ')}</p>
+          <p>Date: ${new Date(order.date).toLocaleString()}</p>
+          ${order.paidToSeller ? '<p style="color:green;">Paid to seller</p>' : `<button class="button" onclick="payoutSeller('${order.orderId}', ${order.total * 0.95})">Pay Seller $${(order.total * 0.95).toFixed(2)}</button>`}
+        `;
+        ordersList.appendChild(orderDiv);
+
+        if (!order.paidToSeller) {
+          const payoutDiv = document.createElement('div');
+          payoutDiv.className = 'card';
+          payoutDiv.innerHTML = `<p>Order #${order.orderId} • Pay $${(order.total * 0.95).toFixed(2)}</p>`;
+          payoutsList.appendChild(payoutDiv);
+        }
+      });
+
+      document.getElementById('today-sales').textContent = `$${todaySales.toFixed(2)}`;
+      document.getElementById('commission').textContent = `$${commission.toFixed(2)}`;
+    }
+
+    function payoutSeller(orderId, amount) {
+      if (confirm(`Pay $${amount.toFixed(2)} to seller?`)) {
+        alert('Payment sent! (Simulated)');
+        const orders = JSON.parse(localStorage.getItem('all_orders') || '[]');
+        const order = orders.find(o => o.orderId === orderId);
+        if (order) order.paidToSeller = true;
+        localStorage.setItem('all_orders', JSON.stringify(orders));
+        loadAdminData();
+      }
+    }
+  </script>
+</body>
+</html>

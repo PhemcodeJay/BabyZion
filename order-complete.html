@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Order Confirmed - BABYZION MARKET</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <meta property="og:title" content="BABYZION MARKET">
+  <meta property="og:description" content="Adorable, safe & stylish baby clothes, toys, and essentials.">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="gradient">
+  <header>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">Our Story</a></li>
+        <li><a href="collections.html">Collections</a></li>
+        <li><a href="products.html">Shop All</a></li>
+        <li><a href="upload.html">Sell With Us</a></li>
+        <li><a href="cart.html">🛒 Cart (<span class="cart-count">0</span>)</a></li>
+      </ul>
+    </nav>
+    <div class="logo-container">
+      <img src="logo.png" alt="BABYZION MARKET" class="header-logo">
+    </div>
+    <h1>Order Confirmed!</h1>
+  </header>
+
+  <main class="hero" style="text-align:center; padding:60px 20px;">
+    <p>Thank you for your purchase!</p>
+    <p><strong>PayPal Order ID:</strong> <span id="orderId"></span></p>
+    <p>Your items will ship in 1-3 days</p>
+    <p>Tracking sent to email + WhatsApp</p>
+    <a href="products.html" class="button animate-shop">Continue Shopping</a>
+  </main>
+
+  <a href="https://wa.me/254700000000?text=Hi! I saw your baby items on BABYZION MARKET - can I order?" 
+     class="whatsapp-float" target="_blank">Order Now</a>
+
+  <footer>
+    <p>© 2025 BABYZION MARKET • Made with love for little ones</p>
+  </footer>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    document.getElementById('orderId').textContent = params.get('order') || 'N/A';
+  </script>
+</body>
+</html>

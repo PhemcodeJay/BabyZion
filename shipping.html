@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shipping - BABYZION MARKET</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <meta property="og:title" content="BABYZION MARKET">
+  <meta property="og:description" content="Adorable, safe & stylish baby clothes, toys, and essentials.">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="gradient">
+  <header>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">Our Story</a></li>
+        <li><a href="collections.html">Collections</a></li>
+        <li><a href="products.html">Shop All</a></li>
+        <li><a href="upload.html">Sell With Us</a></li>
+        <li><a href="cart.html">🛒 Cart (<span class="cart-count">0</span>)</a></li>
+      </ul>
+    </nav>
+    <div class="logo-container">
+      <img src="logo.png" alt="BABYZION MARKET" class="header-logo">
+    </div>
+    <h1>Shipping Information</h1>
+    <p class="tagline">Enter your details for fast delivery</p>
+  </header>
+
+  <main style="max-width:1200px; margin:40px auto; padding:20px;">
+    <div class="grid" style="grid-template-columns: 1fr 1fr; gap:30px;">
+      <div class="card order-summary-sidebar">
+        <h3>Order Summary</h3>
+        <div id="summary-items"></div>
+        <hr>
+        <div class="summary-row"><span>Subtotal:</span> <strong id="order-subtotal">$0.00</strong></div>
+        <div class="summary-row"><span>Items:</span> <span id="item-count">0</span></div>
+      </div>
+
+      <div class="card shipping-form-container">
+        <form id="shipping-form">
+          <h2>Contact Information</h2>
+          
+          <label for="name">Full Name *</label>
+          <input type="text" id="name" required placeholder="John Doe">
+          
+          <label for="email">Email Address *</label>
+          <input type="email" id="email" required placeholder="john@example.com">
+          
+          <label for="phone">Phone Number *</label>
+          <input type="tel" id="phone" required placeholder="+254 700 000 000">
+
+          <h2>Shipping Address</h2>
+          
+          <label for="country">Country *</label>
+          <select id="country" required>
+            <option value="">Select Country</option>
+            <option value="Kenya">Kenya</option>
+            <option value="USA">United States</option>
+            <option value="UK">United Kingdom</option>
+            <option value="Canada">Canada</option>
+            <option value="UAE">United Arab Emirates</option>
+            <option value="Nigeria">Nigeria</option>
+            <option value="South Africa">South Africa</option>
+            <option value="Other">Other</option>
+          </select>
+          
+          <label for="city">City *</label>
+          <input type="text" id="city" required placeholder="Nairobi">
+          
+          <label for="address">Street Address *</label>
+          <input type="text" id="address" required placeholder="123 Baby Street, Apt 4B">
+          
+          <label for="postal">Postal/ZIP Code</label>
+          <input type="text" id="postal" placeholder="00100">
+          
+          <label for="notes">Delivery Notes (Optional)</label>
+          <textarea id="notes" rows="3" placeholder="Any special instructions?"></textarea>
+
+          <button type="submit" class="button">Continue to Payment</button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <a href="https://wa.me/254700000000?text=Hi! I saw your baby items on BABYZION MARKET - can I order?" 
+     class="whatsapp-float" target="_blank">Order Now</a>
+
+  <footer>
+    <p>© 2025 BABYZION MARKET • Made with love for little ones</p>
+  </footer>
+
+  <script src="cart.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const cart = JSON.parse(localStorage.getItem('babyzion_cart') || '[]');
+      const summaryItems = document.getElementById('summary-items');
+      let subtotal = 0;
+      let itemCount = 0;
+
+      if (cart.length === 0) {
+        window.location.href = 'cart.html';
+      } else {
+        cart.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'summary-row';
+          div.innerHTML = `<span>${item.name} x${item.quantity}</span><span>$${ (item.price * item.quantity).toFixed(2) }</span>`;
+          summaryItems.appendChild(div);
+          subtotal += item.price * item.quantity;
+          itemCount += item.quantity;
+        });
+      }
+
+      document.getElementById('order-subtotal').textContent = `$${subtotal.toFixed(2)}`;
+      document.getElementById('item-count').textContent = itemCount;
+
+      const saved = JSON.parse(localStorage.getItem('shipping_info') || '{}');
+      Object.keys(saved).forEach(k => document.getElementById(k)?.value = saved[k]);
+
+      document.getElementById('shipping-form').onsubmit = e => {
+        e.preventDefault();
+        const data = {
+          name: document.getElementById('name').value,
+          email: document.getElementById('email').value,
+          phone: document.getElementById('phone').value,
+          country: document.getElementById('country').value,
+          city: document.getElementById('city').value,
+          address: document.getElementById('address').value,
+          postal: document.getElementById('postal').value,
+          notes: document.getElementById('notes').value
+        };
+        localStorage.setItem('shipping_info', JSON.stringify(data));
+        window.location.href = 'payment.html';
+      };
+    });
+  </script>
+
+  <style>
+    .summary-row { display: flex; justify-content: space-between; margin: 8px 0; }
+    input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 25px; border: 2px solid #ffd6e0; }
+    label { font-weight: 600; color: #555; margin-top: 15px; display: block; }
+    @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</body>
+</html>

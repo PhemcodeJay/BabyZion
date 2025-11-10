@@ -569,3 +569,325 @@ footer {
   .category-card h3 { font-size: 1rem; }
   .category-card p { font-size: 0.75rem; }
 }
+
+/* styles.css - BABYZION MARKET 2025 */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Poppins', 'Segoe UI', sans-serif;
+  background: linear-gradient(to bottom right, #fff5f8, #eaf9ff);
+  color: #333;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* Header */
+header {
+  background: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 100%);
+  color: white;
+  text-align: center;
+  padding: 8px 15px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 15px rgba(255, 107, 157, 0.3);
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  list-style: none;
+  margin: 8px 0;
+}
+
+nav ul li a {
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 8px 16px;
+  border-radius: 25px;
+  transition: all 0.3s ease;
+}
+
+nav ul li a:hover,
+nav ul li a.active {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.logo-container img {
+  height: 45px;
+  margin: 5px auto;
+  display: block;
+}
+
+h1 {
+  font-size: 1.6rem;
+  margin: 5px 0;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.tagline {
+  font-size: 0.85rem;
+  font-style: italic;
+  opacity: 0.95;
+}
+
+/* Buttons */
+.btn, .button, .add-to-cart-btn, .magic-btn {
+  background: linear-gradient(135deg, #ff6b9d, #ff8fab);
+  color: white;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(255, 107, 157, 0.4);
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn:hover, .button:hover, .add-to-cart-btn:hover, .magic-btn:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 10px 25px rgba(255, 107, 157, 0.5);
+}
+
+/* Hero */
+.hero {
+  padding: 90px 20px;
+  text-align: center;
+}
+
+.hero h2 {
+  font-size: 2.8rem;
+  color: #ff6b9d;
+  margin-bottom: 15px;
+  animation: float 4s ease-in-out infinite;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  color: #555;
+  max-width: 700px;
+  margin: 0 auto 30px;
+}
+
+/* Collections Grid */
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 25px;
+  padding: 40px 20px;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+.category-card {
+  background: white;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(255, 107, 157, 0.15);
+  transition: all 0.4s ease;
+  cursor: pointer;
+}
+
+.category-card:hover {
+  transform: translateY(-15px);
+  box-shadow: 0 25px 50px rgba(255, 107, 157, 0.3);
+}
+
+.card-inner {
+  padding: 30px 20px;
+  text-align: center;
+}
+
+.icon-bounce {
+  font-size: 3.5rem;
+  margin-bottom: 15px;
+  display: block;
+  animation: bounce 2s infinite;
+}
+
+.category-card h3 {
+  font-size: 1.35rem;
+  color: #333;
+  margin: 12px 0;
+}
+
+.category-card p {
+  color: #777;
+  font-size: 0.95rem;
+  margin-bottom: 20px;
+}
+
+.magic-btn {
+  padding: 12px 24px;
+  font-size: 0.95rem;
+}
+
+/* Products Grid */
+#products-grid, #featured-products {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 30px;
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.product-card {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  transition: all 0.4s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.product-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(255, 107, 157, 0.25);
+}
+
+.product-card img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  background: #f8f8f8;
+}
+
+.product-card h3 {
+  font-size: 1.15rem;
+  padding: 15px 15px 5px;
+  color: #333;
+  height: 56px;
+  overflow: hidden;
+}
+
+.product-card p {
+  padding: 0 15px;
+  color: #666;
+  font-size: 0.9rem;
+  flex-grow: 1;
+}
+
+.price {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #ff6b9d;
+  padding: 10px 15px;
+}
+
+.add-to-cart-btn {
+  margin: 15px;
+  margin-top: auto;
+}
+
+/* Filter Buttons */
+.filter-section {
+  text-align: center;
+  padding: 30px 20px;
+  background: white;
+  margin: 20px auto;
+  max-width: 1200px;
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+}
+
+.filter-btn {
+  background: #ffe0e9;
+  color: #555;
+  border: none;
+  padding: 12px 24px;
+  margin: 8px;
+  border-radius: 30px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.filter-btn.active, .filter-btn:hover {
+  background: #ff6b9d;
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* WhatsApp Float */
+.whatsapp-float {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  width: 62px;
+  height: 62px;
+  background: #25D366;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  z-index: 1000;
+  text-decoration: none;
+  animation: pulse 2s infinite;
+}
+
+.whatsapp-float:hover {
+  transform: scale(1.1);
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 50px 20px;
+  background: linear-gradient(135deg, #fff1f8, #f8f5ff);
+  color: #777;
+  font-size: 0.9rem;
+  margin-top: 80px;
+}
+
+/* Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-20px); }
+  60% { transform: translateY(-10px); }
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5); }
+  70% { box-shadow: 0 0 0 15px rgba(37, 211, 102, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hero h2 { font-size: 2.2rem; }
+  nav ul { flex-direction: column; }
+  nav ul li a { display: block; margin: 4px 0; }
+  .categories-grid { grid-template-columns: repeat(2, 1fr); }
+  #products-grid, #featured-products { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 480px) {
+  .categories-grid, #products-grid, #featured-products { grid-template-columns: 1fr; }
+  .filter-btn { display: block; width: 90%; margin: 10px auto; }
+}
